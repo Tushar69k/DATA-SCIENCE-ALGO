@@ -1,583 +1,324 @@
-# DATA-SCIENCE-ALGO
 
+# Conm Answers
 
+### Q.1 a) False-position (Regula-Falsi) method — outline & derivation (short)
 
-# **K-Nearest Neighbors (KNN) Algorithm Using Euclidean Distance**
+* Suppose (f(a)) and (f(b)) have opposite signs. The root lies in ([a,b]).
+* Replace the interval end with the point where the **secant** through ((a,f(a))) and ((b,f(b))) crosses the x-axis:
+  [
+  c = b - f(b)\frac{b-a}{f(b)-f(a)} \quad(\text{or symmetrically } c=a - f(a)\frac{b-a}{f(b)-f(a)}).
+  ]
+* If (f(c)f(a)<0) keep ([a,c]) else keep ([c,b]). Repeat until desired tolerance.
+* Converges linearly; faster than bisection often but can slow if one end becomes “stuck”.
 
-The **K-Nearest Neighbors (KNN)** algorithm is a very simple method used in **classification** and **regression**.
-It works by looking at the **closest points** in the training data and deciding the class based on them.
+### Q.1 b) Euler’s method — outline & derivation (short)
 
+* From (y'=f(x,y),; y(x_0)=y_0). Use first-order Taylor:
+  [
+  y(x+h)=y(x)+h,y'(x)+O(h^2)=y(x)+h f(x,y)+O(h^2).
+  ]
+* Discrete iteration (explicit Euler):
+  [
+  y_{n+1}=y_n + h f(x_n,y_n).
+  ]
+* Local truncation error (O(h^2)), global error (O(h)). Simple but low accuracy / conditionally stable.
 
-To find the class of a new data point by checking the classes of its **K nearest (closest)** points.
+### Q.2 a) Gauss-elimination (outline)
 
+* Transform the linear system (A\mathbf{x}=\mathbf{b}) by forward elimination to upper triangular form, then back substitution.
+* Steps: for each pivot row (i):
 
+  * For each row (j>i) compute multiplier (m_{ji}=a_{ji}/a_{ii}) and do (R_j\leftarrow R_j-m_{ji}R_i).
+* After upper triangular, compute (x_n) from last equation and back substitute.
+* Mention partial pivoting to avoid division by small pivots.
 
-## **Step-by-Step KNN Algorithm**
+### Q.2 b) Define error & types (short)
 
-### **Step 1: Choose the Value of K**
+* **True error**: (E_{\text{true}} = x_{\text{true}} - x_{\text{approx}}).
+* **Relative error**: (|E_{\text{true}}/x_{\text{true}}|).
+* **Truncation error**: from approximating infinite processes (Taylor truncation).
+* **Rounding/error due to finite precision**: due to machine arithmetic.
+* Give small numeric examples for each in exam.
 
-* Choose a number **K** (1, 3, 5, 7, etc.).
-* K means how many neighbors we will check.
-* K is usually an **odd number** so that voting is easy (no tie).
+### Q.3 a) Newton’s general divided difference formula
 
+* Newton forward form (for nodes (x_0,\dots,x_n)):
+  [
+  P_n(x)=f[x_0]+f[x_0,x_1](x-x_0)+f[x_0,x_1,x_2](x-x_0)(x-x_1)+\cdots
+  ]
+* Divided differences defined recursively:
+  [
+  f[x_i]=f(x_i),\quad f[x_i,x_{i+1}]=\frac{f(x_{i+1})-f(x_i)}{x_{i+1}-x_i},
+  ]
+  [
+  f[x_i,\dots,x_{i+k}] = \frac{f[x_{i+1},\dots,x_{i+k}]-f[x_i,\dots,x_{i+k-1}]}{x_{i+k}-x_i}.
+  ]
+* Use the divided-difference table to build polynomial incrementally.
 
-### **Step 2: Calculate Euclidean Distance**
+### Q.3 b) Gauss backward central difference formula (outline)
 
-We have a new point:
+* For equally spaced nodes and interpolation near the center, use central difference formulas (Gauss forward/backward) to get compact formulas for interpolation and differentiation; derive using Newton–Gregory central forms and differences (\Delta).
+* (Exam-level writeup: show central difference operator relations and final Gauss backward formula.)
 
+---
+
+# Worked numerical problems (detailed, with final answers)
+
+I solved these numerically and show the steps & final values.
+
+---
+
+## Q.4 a)
+
+**Problem:** Using Taylor’s series method, solve ODE
 [
-Q = (q_1, q_2, …, q_n)
+\frac{dy}{dx} = 1 + x - y^2,\quad y(0)=0,\quad h=0.1.
+]
+Find (y(0.1)).
+
+**Method (use Taylor up to 2nd derivative):**
+
+Given (y' = 1 + x - y^2).
+
+Compute second derivative:
+[
+y'' = \frac{d}{dx}(1+x-y^2)=1 - 2y,y'.
 ]
 
-And a training point:
+At (x=0,; y(0)=0): (y'(0)=1+0-0=1,; y''(0)=1-2\cdot0\cdot1=1.)
 
+Taylor (to second order):
 [
-P = (p_1, p_2, …, p_n)
+y(0.1) \approx y(0) + h y'(0) + \frac{h^2}{2} y''(0).
+]
+Plugging in (h=0.1):
+[
+y(0.1) \approx 0 + 0.1(1) + \frac{0.01}{2}(1) = 0.1 + 0.005 = \boxed{0.105}.
 ]
 
-To find how close they are, we use the **Euclidean Distance** formula:
+---
+
+## Q.4 b)
+
+**Problem:** From table
+(x: 1.5,;2.0,;2.5,;3.0,;3.5,;4.0)
+(f(x): 3.375,;7.000,;13.625,;24.000,;38.875,;59.000)
+Find (f'(1.5)) and (f''(1.5)) using Newton’s forward difference derivative formula.
+
+**Work:**
+
+* Step (h=0.5). Build forward differences:
 
 [
-\text{Distance} = \sqrt{(q_1 - p_1)^2 + (q_2 - p_2)^2 + … + (q_n - p_n)^2}
+\begin{aligned}
+\Delta f_0 &= 3.625,\quad \Delta^2 f_0 = 3.0,\quad \Delta^3 f_0 = 0.75,\quad \Delta^4 f_0 = 0.
+\end{aligned}
 ]
 
-This gives a number.
-**Smaller distance = closer point.**
-
-
-
-### **Step 3: Find K Nearest Neighbors**
-
-* Calculate the distance of **every** training point from Q.
-* Put the distances in a list.
-* Sort the list from **smallest to largest**.
-* Pick the **top K points** → these are the **K nearest neighbors** of Q.
-
-
-
-### **Step 4: Decide the Output (Voting / Average)**
-
-#### **For Classification**
-
-* Look at the classes of the K neighbors.
-* Count how many neighbors belong to each class.
-* The class with the **highest count (majority)** becomes the class of Q.
-
-This is called **majority voting**.
-
-#### **For Regression**
-
-* Take the **average or median** of the values of the K neighbors.
-
-
-
-### **Step 5: Final Prediction**
-
-Assign the chosen class/value to the new query point Q.
-
-
-
-## **Example (K = 3)**
-
-Suppose the 3 nearest neighbors have these classes:
-
-* Neighbor 1 → **Class A**
-* Neighbor 2 → **Class B**
-* Neighbor 3 → **Class A**
-
-Count:
-
-* Class A → 2
-* Class B → 1
-
-So the final class is:
-
-### ✔ **Class A** (majority)
-
----
-
-
-
-
-# **K-Means Clustering Algorithm**
-
-*(Easy Language, Full Exam Format)*
-
-
-K-Means is an **unsupervised learning** algorithm used to group data into **K clusters**.
-The goal is to place data points into clusters such that points in the same cluster are **similar**, and points in different clusters are **different**.
-
-
-# **Algorithm: K-Means Clustering (Step-by-Step)**
-
-### **Step 1: Choose the value of K**
-
-* Decide how many clusters you want (K).
-* Example: K = 3 means you want 3 clusters.
-
-### **Step 2: Initialize centroids**
-
-* Randomly select **K points** from the dataset as the initial **centroids**.
-* A centroid is like the “center” of a cluster.
-
-### **Step 3: Assign each data point to the nearest centroid**
-
-* For each data point:
-
-  * Calculate the **distance** to each centroid
-  * Mostly **Euclidean distance** is used
-  * Assign the point to the centroid with **minimum distance**
-  * This forms clusters
-
-### **Step 4: Update centroids**
-
-* After assigning all points:
-
-  * Take the **mean (average)** of all points in each cluster
-  * This mean becomes the **new centroid**
-
-### **Step 5: Repeat Step 3 and Step 4**
-
-* Keep assigning points and updating centroids
-* Stop when:
-
-  * Centroids **do not change**, or
-  * Maximum number of iterations is reached
-
-### **Step 6: Final Clusters**
-
-* The algorithm returns the final **K clusters** and their **centroids**.
-
----
-
-# **Flow / Diagram (Text-Based)**
-
-```
-Start
-  ↓
-Choose K
-  ↓
-Select K initial centroids (random)
-  ↓
-Assign each point to nearest centroid
-  ↓
-Recalculate centroids (mean)
-  ↓
-Centroids changed?
-    Yes → Repeat assignment step
-    No  → Stop
-  ↓
-Output final clusters
-```
-
----
-
-# **How Initial Centroids Influence the Results**
-
-Initial centroids play a **very important role** in K-Means because:
-
-### **1. Different starting points → Different final clusters**
-
-* K-Means can get stuck in **local minima**
-* If the initial centroid positions are bad:
-
-  * Clusters will be bad
-* If the starting centroids are good:
-
-  * Clusters will be more accurate
-
-### **2. K-Means may give different results each time**
-
-* Because centroids are chosen **randomly**
-* Running the algorithm again may give **different clusters**
-
-### **3. Poor initialization can create:**
-
-* Wrong cluster shapes
-* Uneven clusters
-* Empty clusters
-* Convergence to a bad solution
-
-### **4. Good initialization improves:**
-
-* Speed of convergence
-* Stability of results
-* Quality of clusters
-
-### **5. K-Means++ initialization**
-
-* A better method to choose initial centroids
-* It spreads initial centroids apart
-* Gives more stable and accurate clusters
-
----
-
-# **Example of Impact (Simple)**
-
-If you choose two centroids far away from natural groups, clusters become **wrong**.
-But if initial centroids are placed near natural groups, clusters are **perfect**.
-
----
-
-# **Short Summary**
-
-* K-Means depends heavily on the **initial centroids**
-* Poor initial centroids → poor clustering
-* Good initial centroids → good clustering
-* K-Means++ solves this issue
-
----
-
-
-
-
-
----
-
-
-Sure! Here is the **Linear Regression Algorithm in the simplest and easiest English**, perfect for quick learning and exam writing.
-
----
-
-# **Linear Regression Algorithm (Very Simple Version)**
-
-### **Goal**
-
-Linear Regression tries to draw a **straight line** that best fits the given data points so we can **predict** future values.
-
----
-
-# **Algorithm (Step-by-Step in Easy Language)**
-
-### **Step 1: Start**
-
-* Take the dataset with input (x) and output (y).
-
-### **Step 2: Choose starting values**
-
-* Start with any values for:
-
-  * **Intercept (b₀)**
-  * **Slope (b₁)**
-    These are just random or small numbers.
-
-### **Step 3: Predict**
-
-* For every input (x), predict the output using:
+* Newton forward derivative formula at (x_0):
   [
-  \hat{y} = b_0 + b_1 x
+  f'(x_0)=\frac{1}{h}\Big(\Delta f_0 - \tfrac12\Delta^2 f_0 + \tfrac13\Delta^3 f_0 - \cdots\Big).
   ]
 
-### **Step 4: Find the error**
-
-* Error = predicted value − actual value
+* Using terms up to (\Delta^3):
   [
-  error = \hat{y} - y
+  f'(1.5)=\frac{1}{0.5}\Big(3.625 - 0.5(3.0) + \tfrac13(0.75)\Big)
+  =2\big(3.625 - 1.5 + 0.25\big)=2(2.375)=\boxed{4.75}.
   ]
 
-### **Step 5: Improve the line (Gradient Descent)**
-
-* Change (update) (b_0) and (b_1) a little so that errors become smaller.
-* This is done using:
-
-  * Intercept update
-  * Slope update
-
-(You don’t need to write full formulas in simple answers — only say “update values to reduce error.”)
-
-### **Step 6: Repeat**
-
-* Repeat **predict → error → update** many times
-* The line becomes better and better.
-
-### **Step 7: Final Line**
-
-* When updates become very small, you get the **best-fit line**:
+* For second derivative (forward expansion):
   [
-  y = b_0 + b_1 x
+  f''(x_0)=\frac{1}{h^2}\Big(\Delta^2 f_0 - \Delta^3 f_0 + \cdots\Big)
+  ]
+  (using up to (\Delta^3)):
+  [
+  f''(1.5)=\frac{1}{(0.5)^2}\big(3.0 - 0.75\big)=\frac{2.25}{0.25}= \boxed{9.00}.
   ]
 
 ---
 
-# **One-Paragraph Super Simple Explanation**
+## Q.5 a)
 
-Linear Regression draws the best straight line through the data. It starts with a random line, checks how wrong the predictions are, and then keeps adjusting the line again and again until the error becomes very small. The final line is used to predict new values.
-
----
-
-If you want, I can also provide:
-📌 A simple diagram
-📌 A 5-mark or 10-mark complete answer
-📌 Real-life example (like house price prediction)
-
-Just tell me!
-
-
-
-
-Here is the **Logistic Regression Algorithm in the SAME simple style** as your linear regression explanation — very easy language and exam-friendly.
-
----
-
-# **Logistic Regression Algorithm (Very Simple Version)**
-
-### **Goal**
-
-Logistic Regression is used to **predict categories**, like:
-
-* Yes / No
-* Spam / Not Spam
-* 0 / 1
-
-It does not draw a straight line.
-It uses an **S-shaped curve** (called the *sigmoid function*) to give a probability.
-
----
-
-# **Algorithm (Step-by-Step in Easy Language)**
-
-### **Step 1: Start**
-
-* Take input values (x) and output labels (y) (0 or 1).
-
-### **Step 2: Choose starting values**
-
-* Start with any values for:
-
-  * **Intercept (b₀)**
-  * **Weight/Slope (b₁)**
-
-These can be small random numbers.
-
-### **Step 3: Make a prediction**
-
-* First calculate a linear part:
-  [
-  z = b_0 + b_1 x
-  ]
-
-* Then convert this to a probability using the **sigmoid function**:
-  [
-  \hat{y} = \frac{1}{1 + e^{-z}}
-  ]
-
-This probability is between **0 and 1**.
-
-### **Step 4: Find the error**
-
-* Compare predicted value (\hat{y}) with actual value (y).
-
-### **Step 5: Improve the model (Gradient Descent)**
-
-* Adjust (update) (b_0) and (b_1) to reduce the error.
-* Updates continue until error becomes very small.
-
-*(You can simply write: “Update parameters to reduce error using gradient descent.”)*
-
-### **Step 6: Repeat**
-
-* Repeat **predict → error → update** many times.
-
-### **Step 7: Final Decision**
-
-* After training, use the final model:
-
-  * If probability ≥ 0.5 → **Class = 1**
-  * If probability < 0.5 → **Class = 0**
-
----
-
-# **One-Paragraph Super Simple Explanation**
-
-Logistic Regression predicts if something belongs to class 0 or 1. It takes the input, applies a linear equation, then passes it into a sigmoid function to get a probability. Based on this probability, it gives the final class. During training, it keeps adjusting its parameters to reduce error until it fits well.
-
----
-
-If you want, I can also give:
-📌 Diagram of the sigmoid curve
-📌 5-mark or 10-mark long-form answer
-📌 Logistic Regression vs Linear Regression
-
-Just tell me!
-
----
-
-
----
-
-
-
-Ah! Got it 😄 — if you are a complete beginner, we need to make the **Apriori Algorithm explanation super simple, step-by-step, with zero technical jargon**. Here’s a **beginner-friendly version** you can understand and write in exams easily.
-
----
-
-# **Apriori Algorithm – Beginner Friendly**
-
-**Goal:** Find patterns like “People who buy A also buy B” from a list of transactions.
-
----
-
-## **Step 1: Look at all items**
-
-* Go through all transactions and **write down all items** sold.
-* Count how many times each item appears.
-
-**Example:**
-Transactions:
-
-* T1 = {Milk, Bread}
-* T2 = {Milk, Diaper}
-* T3 = {Bread, Diaper}
-
-Count: Milk=2, Bread=2, Diaper=2
-
----
-
-## **Step 2: Keep only frequent items**
-
-* Decide a **minimum number of times** an item must appear (called **minimum support**).
-* Remove items that appear less than this.
-
-**Example:** If min support = 2 → all items are kept (Milk, Bread, Diaper)
-
----
-
-## **Step 3: Make bigger combinations**
-
-* Combine frequent items to make **pairs, triplets**, etc.
-* Only keep combinations that **appear enough times** in transactions.
-
-**Example:**
-
-* Pairs: {Milk, Bread}, {Milk, Diaper}, {Bread, Diaper}
-
-* Count how many transactions contain each pair:
-
-  * {Milk, Bread} → 1
-  * {Milk, Diaper} → 1
-  * {Bread, Diaper} → 1
-
-* If minimum support = 2 → none of the pairs are frequent.
-
----
-
-## **Step 4: Make rules**
-
-* For each frequent itemset, make **rules like “A → B”**.
-* Check if the rule is strong enough using **confidence**.
-
-**Example:** If {Milk, Bread} is frequent → rule: “If someone buys Milk, they also buy Bread.”
-
----
-
-## **Step 5: Finish**
-
-* Now you have:
-
-  1. **Frequent items**
-  2. **Association rules** like “A → B”
-
----
-
-### **Summary in Simple Words**
-
-1. Count how many times items appear.
-2. Keep items that appear enough times.
-3. Make pairs, triplets… and check if they are frequent.
-4. Make rules from frequent sets.
-5. Done! You found patterns in shopping data.
-
----
-
-If you want, I can also **draw a tiny diagram/flowchart** showing these 5 steps. That makes it **super easy for a beginner to remember**.
-
-Do you want me to do that?
-
-----
----
-
-
-
-Absolutely! Let’s make the **Gini Index algorithm** in the same **super beginner-friendly, step-by-step style** as the Apriori explanation.
-
----
-
-# **Gini Index Algorithm – Beginner Friendly**
-
-**Goal:** To find the **best split** in a decision tree by measuring how “mixed” a group of data is.
-
-* Gini Index = 0 → all items in the group belong to **one class** (pure)
-* Gini Index = 0.5 → items are **evenly split** (impure)
-
----
-
-## **Step 1: Choose a feature to split**
-
-* Pick one feature/column from your dataset (e.g., “Color” or “Age”).
-
----
-
-## **Step 2: Split the dataset**
-
-* Divide the data into **groups based on feature values**.
-
-  * Example: Feature = Color → Groups = Red, Blue, Green
-
----
-
-## **Step 3: Calculate Gini for each group**
-
-1. Count how many items belong to each **class** in the group.
-2. Use the formula:
-
+**Problem:** Solve ODE by Picard successive approximations:
 [
-Gini = 1 - \sum (p_i)^2
+\frac{dy}{dx} = 1 + x y,\quad y(0)=1,\quad \text{in }[0,0.2],;h=0.1.
+]
+Find successive approximations up to third approximation.
+
+**Picard iteration formula:**
+[
+y_{n+1}(x)=1+\int_0^x\big(1 + t,y_n(t)\big),dt.
 ]
 
-where (p_i) = proportion of items in class i.
+Start (y_0(x)=1).
 
-**Example:**
-Group Red has 3 apples and 1 orange → Total=4
+* (y_1(x)=1+\int_0^x(1+t\cdot1),dt = 1 + x + \tfrac{x^2}{2}.)
 
-* p(apple) = 3/4 = 0.75
-* p(orange) = 1/4 = 0.25
-* Gini = 1 − (0.75² + 0.25²) = 1 − (0.5625 + 0.0625) = 0.375
+* (y_2(x)=1+\int_0^x\big(1 + t(1 + t + \tfrac{t^2}{2})\big)dt
+  =1 + x + \tfrac{x^2}{2} + \tfrac{x^3}{3} + \tfrac{x^4}{8}.)
 
----
+* (y_3(x)=1+\int_0^x\big(1+t,y_2(t)\big),dt
+  =1 + x + \tfrac{x^2}{2} + \tfrac{x^3}{3} + \tfrac{x^4}{8} + \tfrac{x^5}{15} + \tfrac{x^6}{48}.)
 
-## **Step 4: Calculate Weighted Gini for split**
+**Numerical values** (useful at (x=0.1) and (x=0.2), step (h=0.1)):
 
-* Multiply each group’s Gini by its **proportion in total dataset**.
-* Add them up → this is the **Gini for this feature split**.
+* At (x=0.1):
 
----
+  * (y_1(0.1)=1.105000),
+  * (y_2(0.1)=1.1053458333333),
+  * (y_3(0.1)=1.1053465208333).
 
-## **Step 5: Repeat for all features**
+* At (x=0.2):
 
-* Do steps 1–4 for **every feature**.
-* Choose the feature with **lowest Gini index** → best split.
+  * (y_1(0.2)=1.220000),
+  * (y_2(0.2)=1.2228666666667),
+  * (y_3(0.2)=1.2228893333333).
 
----
-
-## **Step 6: Split the dataset**
-
-* Use the feature with lowest Gini to **split the dataset**.
-* Repeat the process recursively for each subgroup.
+So third approximation (y_3) at (x=0.1) is ≈ **1.10534652** and at (x=0.2) ≈ **1.22288933**.
 
 ---
 
-### **Summary in Simple Words**
+## Q.5 b)
 
-1. Pick a feature.
-2. Divide data into groups based on that feature.
-3. Calculate Gini for each group.
-4. Find weighted Gini for the feature.
-5. Pick the feature with **lowest Gini** → best split.
-6. Repeat for each subgroup until data is “pure.”
+**Problem:** Find the root of (x^3 - 3x - 5 = 0) correct to three places using Newton-Raphson.
+
+**Newton iteration:** (x_{n+1} = x_n - \dfrac{f(x_n)}{f'(x_n)}) with (f'(x)=3x^2 -3).
+
+Using an initial guess (take (x_0=2.0)), iterating gives the root:
+[
+\boxed{x\approx 2.279\ (\text{to three decimals})}.
+]
+(Actual root ≈ 2.279018786…; rounded to 3 decimals 2.279.)
 
 ---
 
-If you want, I can also **make it into a super tiny flowchart** like a 5-step picture so it’s **super easy to remember for exams**.
+## Q.6 a)
 
-Do you want me to do that?
+**Problem:** Given data
+[
+x: 4.0,;4.2,;4.4,;4.6,;4.8,;5.0,;5.2,\
+y:1.3863,;1.4351,;1.4816,;1.5261,;1.5686,;1.6094,;1.6487,
+]
+compute (\displaystyle\int_{4.0}^{5.2} y,dx) by (i) composite trapezoidal and (ii) Simpson’s 1/3 rule. (Here (h=0.2).)
+
+**(i) Composite trapezoidal rule**
+[
+I_T = h\Big[\tfrac12 y_0 + y_1 + y_2 + \cdots + y_{n-1} + \tfrac12 y_n\Big].
+]
+With the data:
+[
+I_T \approx \boxed{1.8276600}.
+]
+
+**(ii) Composite Simpson’s 1/3 rule** (n must be even; here (n=6))
+[
+I_S = \frac{h}{3}\Big[y_0 + y_n + 4\sum_{odd} y_i + 2\sum_{even\ne0,n} y_i\Big].
+]
+Compute:
+[
+I_S \approx \boxed{1.8278533333}.
+]
+
+(Values are close; Simpson slightly different as expected.)
+
+---
+
+## Q.6 b)
+
+**Problem:** Using Lagrange interpolation from the table
+[
+x: 0.0,0.1,0.2,0.3,0.4;\quad f(x):1.0000,1.1052,1.2214,1.3499,1.4918
+]
+find (f(0.35)).
+
+**Solution (Lagrange polynomial of degree 4 evaluated at 0.35):**
+[
+f(0.35)\approx \boxed{1.4191140625}\approx 1.41911.
+]
+
+(Computed by direct Lagrange interpolation.)
+
+---
+
+## Q.7 a)
+
+**Problem:** Given (\dfrac{dy}{dx}=\dfrac{3x+y}{2},; y(1)=1). Use Runge-Kutta 2nd order (midpoint) on interval ([1,1.2]) with (h=0.1).
+
+**Method (RK2 midpoint):** for each step
+[
+k_1 = f(x_n,y_n),\quad k_2 = f\big(x_n+\tfrac{h}{2},,y_n+\tfrac{h}{2}k_1\big),
+\quad y_{n+1}=y_n + h k_2.
+]
+
+**Two steps (from 1.0 → 1.1 → 1.2):**
+
+* Step 1: (x_0=1.0,y_0=1.0).
+
+  * (k_1=(3\cdot1+1)/2=2.0).
+  * (k_2=f(1.05,,1+0.05\cdot2) = f(1.05,1.1)=(3\cdot1.05+1.1)/2=(3.15+1.1)/2=2.125).
+  * (y_1 = 1.0 + 0.1\cdot2.125 = \boxed{1.2125}).
+
+* Step 2: (x_1=1.1,y_1=1.2125).
+
+  * (k_1=f(1.1,1.2125)=(3.3+1.2125)/2=2.25625).
+  * (k_2=f(1.15,,1.2125+0.05\cdot2.25625)=f(1.15,1.3233125) = (3\cdot1.15 + 1.3233125)/2=(3.45+1.3233125)/2=2.38665625).
+  * (y_2 = 1.2125 + 0.1\cdot2.38665625 = \boxed{1.451265625}.)
+
+So:
+[
+y(1.1)\approx 1.2125,\quad y(1.2)\approx 1.451265625.
+]
+
+---
+
+## Q.7 b)
+
+**Problem:** Solve the linear system by Gauss–Seidel, correct to three decimals:
+
+System (as in the paper)
+[
+\begin{cases}
+-28 x_1 + 4 x_2 - x_3 = 32,[2pt]
+x_1 + 3 x_2 + 10 x_3 = 24,[2pt]
+2 x_1 + 17 x_2 + 4 x_3 = 35.
+\end{cases}
+]
+
+**Remark:** Convergence of Gauss–Seidel is eased when the coefficient matrix is (strictly) diagonally dominant. The given system is not diagonally dominant in its original row order for all rows, so we can **permute the equations** to obtain a row order that is diagonally dominant and then apply Gauss–Seidel.
+
+Permutation used: keep row1 as is, swap row2↔row3 (i.e. use order: eq1, eq3, eq2). After that Gauss–Seidel converges rapidly.
+
+**Result (to three decimals):**
+[
+\boxed{x_1 \approx -0.970,\quad x_2 \approx 1.706,\quad x_3 \approx 1.985.}
+]
+
+(Exact solution computed numerically: (x_1\approx -0.97006924,; x_2\approx 1.70582980,; x_3\approx 1.98525799). Rounded to 3 decimals as above.)
+
+---
+
+# Summary of final numeric answers (quick list)
+
+* Q4(a) (y(0.1)=\boxed{0.105}).
+* Q4(b) (f'(1.5)=\boxed{4.75},; f''(1.5)=\boxed{9.00}.)
+* Q5(a) Picard approximations:
+
+  * (y_1(x)=1+x+\tfrac{x^2}{2}),
+  * (y_2(x)=1+x+\tfrac{x^2}{2}+\tfrac{x^3}{3}+\tfrac{x^4}{8}),
+  * (y_3(x)=1+x+\tfrac{x^2}{2}+\tfrac{x^3}{3}+\tfrac{x^4}{8}+\tfrac{x^5}{15}+\tfrac{x^6}{48}.)
+  * Numerically: (y_3(0.1)\approx1.1053465,; y_3(0.2)\approx1.2228893.)
+* Q5(b) Newton-Raphson root: (\boxed{2.279}) (3 decimals).
+* Q6(a) Integral from 4.0 to 5.2:
+
+  * Trapezoidal: (\boxed{1.8276600}).
+  * Simpson 1/3: (\boxed{1.8278533333}).
+* Q6(b) Lagrange (f(0.35)\approx\boxed{1.4191140625}).
+* Q7(a) RK2:
+
+  * (y(1.1)\approx\boxed{1.2125},; y(1.2)\approx\boxed{1.451265625}.)
+* Q7(b) Gauss–Seidel (3 d.p.):
+
+  * (\boxed{x_1=-0.970,;x_2=1.706,;x_3=1.985.})
+
+---
 
